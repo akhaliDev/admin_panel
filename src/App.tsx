@@ -1,12 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from '@/auth/AuthProvider'
+import ProtectedRoute from '@/auth/ProtectedRoute'
+import LoginPage from '@/auth/LoginPage'
+import { Toaster } from '@/components/ui/sonner'
+import DashboardPage from '@/features/dashboard/DashboardPage'
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<div className="flex items-center justify-center h-screen"><h1 className="text-2xl font-bold">Админ-панель доставки воды</h1></div>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Защищённые маршруты */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<DashboardPage />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        <Toaster />
+      </AuthProvider>
     </BrowserRouter>
   )
 }
