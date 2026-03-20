@@ -21,48 +21,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [employee, setEmployee] = useState<Employee | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchEmployee = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('employees')
-      .select('*')
-      .eq('id', userId)
-      .single()
+  const fetchEmployee = async (userId: string): Promise<Employee | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('id', userId)
+        .single()
 
-    if (error) {
-      console.error('Ошибка загрузки сотрудника:', error)
+      if (error) {
+        console.error('Ошибка загрузки сотрудника:', error)
+        return null
+      }
+      return data as Employee
+    } catch (err) {
+      console.error('Ошибка сети:', err)
       return null
     }
-    return data as Employee
   }
 
+  // Инициализация — один раз при загрузке
   useEffect(() => {
-    // Получить текущую сессию при загрузке
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-
-      if (session?.user) {
-        const emp = await fetchEmployee(session.user.id)
-        setEmployee(emp)
-      }
-
-      setLoading(false)
-    })
-
-    // Подписка на изменения авторизации
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
 
         if (session?.user) {
+          setSession(session)
+          setUser(session.user)
           const emp = await fetchEmployee(session.user.id)
           setEmployee(emp)
-        } else {
-          setEmployee(null)
         }
-
+      } catch (err) {
+        console.error('Ошибка инициализации:', err)
+      } finally {
         setLoading(false)
+      }
+    }
+
+    init()
+
+    // Слушаем только выход и обновление токена
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          setUser(null)
+          setSession(null)
+          setEmployee(null)
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          setSession(session)
+        }
       }
     )
 
@@ -70,10 +78,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    setLoading(true)
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
     if (error) {
+      setLoading(false)
       return { error: error.message }
     }
+
+    if (data.user) {
+      setUser(data.user)
+      setSession(data.session)
+      const emp = await fetchEmployee(data.user.id)
+      setEmployee(emp)
+    }
+
+    setLoading(false)
     return { error: null }
   }
 

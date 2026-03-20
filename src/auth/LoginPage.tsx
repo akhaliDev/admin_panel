@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,8 +11,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
-  const navigate = useNavigate()
+  const { user, signIn } = useAuth()
+
+  // Если уже залогинен — редирект на главную
+  if (user) {
+    return <Navigate to="/" replace />
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -24,8 +28,6 @@ export default function LoginPage() {
     if (error) {
       setError(error)
       setLoading(false)
-    } else {
-      navigate('/', { replace: true })
     }
   }
 
