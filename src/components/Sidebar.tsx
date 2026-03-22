@@ -63,7 +63,7 @@ export default function Sidebar() {
       {/* Логотип */}
       <div className="flex items-center gap-2 px-6 h-16 border-b">
         <Droplets size={24} className="text-primary" />
-        <span className="font-semibold text-lg">Доставка воды</span>
+        <span className="font-semibold text-lg">Akhali Tskhali Admin</span>
       </div>
 
       {/* Навигация */}

@@ -24,7 +24,7 @@ import { MoreHorizontal, Pencil, Trash2, Plus, Search } from 'lucide-react'
 const paymentLabels: Record<PaymentMethod, string> = {
   cash: 'Наличные',
   card: 'Карта',
-  company: 'Компания',
+  company: 'От компании',
 }
 
 const paymentBadgeVariant: Record<PaymentMethod, 'default' | 'secondary' | 'outline'> = {
@@ -138,10 +138,10 @@ export default function ClientsPage() {
               <TableHead>ФИО</TableHead>
               <TableHead>Телефон</TableHead>
               <TableHead>Адрес</TableHead>
-              <TableHead>Оплата</TableHead>
               <TableHead>Комментарий</TableHead>
               <TableHead>Дата создания</TableHead>
               <TableHead>Последний заказ</TableHead>
+              <TableHead>Оплата</TableHead>
               <TableHead className="w-12" />
             </TableRow>
           </TableHeader>
@@ -157,18 +157,18 @@ export default function ClientsPage() {
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">{client.full_name}</TableCell>
                   <TableCell>{client.phone}</TableCell>
-                  <TableCell className="max-w-50 truncate">{client.address}</TableCell>
-                  <TableCell>
-                    <Badge variant={paymentBadgeVariant[client.payment_method]}>
-                      {paymentLabels[client.payment_method]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="max-w-40 truncate text-muted-foreground">
+                  <TableCell className="max-w-40 truncate">{client.address}</TableCell>
+                  <TableCell className="max-w-60 truncate text-muted-foreground whitespace-normal">
                     {client.comment || '—'}
                   </TableCell>
                   <TableCell>{formatDate(client.created_at)}</TableCell>
                   <TableCell>
                     {client.last_order_at ? formatDate(client.last_order_at) : '—'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={paymentBadgeVariant[client.payment_method]}>
+                      {paymentLabels[client.payment_method]}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
