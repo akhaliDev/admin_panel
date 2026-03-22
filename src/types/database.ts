@@ -95,7 +95,7 @@ export interface Database {
           created_by?: string | null
           updated_by?: string | null
         }
-        Update: Partial<Omit<Expense, 'id' | 'created_at'>>
+        Update: Partial<Omit<Expense, 'id'>>
       }
     }
     Enums: {
